@@ -6,14 +6,22 @@ import requests
 import parsel
 import re
 from tqdm import tqdm
+import time
+import random
 
 from io import BytesIO
 import ddddocr
 from PIL import Image, ImageDraw, ImageFont
 from fontTools.ttLib import TTFont
 
+
+def smart_delay(min_seconds=1, max_seconds=3):
+    time.sleep(random.uniform(min_seconds, max_seconds))
+
+
 def sanitize_filename(title):
-    return re.sub(r'[\\/:*?"<>|]+', '_', title)
+    return re.sub(r'[\/:*?"<>|]+', '_', title)
+
 
 def font_to_img(_code, font_path):
     """
@@ -72,6 +80,7 @@ def single_novel(headers, url, decoder):
     This function is used to scrape a single novel from the Fanqie website.
     :return:
     """
+    smart_delay()
     response = requests.get(url = url, headers = headers)
 
     # Get text
@@ -87,7 +96,7 @@ def single_novel(headers, url, decoder):
 
     new_content = ''
     for i in content:
-        print(i, ord(i))
+        # print(i, ord(i))
         try:
             # decode the content
             new_word = decoder[ord(i)]
@@ -97,7 +106,7 @@ def single_novel(headers, url, decoder):
             new_content += new_word
 
     # Save the content
-    with open("./Novel/" + sanitize_filename(title) + ".txt", "w", encoding="utf-8") as f:
+    with open("./主角长辈/" + sanitize_filename(title) + ".txt", "w", encoding="utf-8") as f:
         f.write(new_content)
 
 
@@ -116,26 +125,26 @@ def patch_novel(headers, link, mapping):
     name = re.findall('<div class="info-name"><h1>(.*?)</h1>', link_data)[0]
 
     print("Collecting: ", name)
+    n = 0
     for i in tqdm(id_list):
-        single_novel(headers, f"https://fanqienovel.com/reader/{i}?enter_from=page", mapping)
-
-    print(id_list)
-    print(name)
+        if n == 73: # 73
+            single_novel(headers, f"https://fanqienovel.com/reader/{i}?enter_from=page", mapping)
+            break
+        n += 1
 
 
 if __name__ == "__main__":
     headers = {
         # User Information
-        'cookie':'x-web-secsdk-uid=9c8a9626-d979-4644-a5e5-fdd03907d508; Hm_lvt_2667d29c8e792e6fa9182c20a3013175=1745953872; HMACCOUNT=B8E51C9762411323; csrf_session_id=902a6c705e879baabff55b645f91cc79; s_v_web_id=verify_ma2vuudk_qIaJLENX_utDK_4XCy_ApoR_HMC71whXqbpB; gfkadpd=2503,36144; serial_uuid=7498814688156321307; serial_webid=7498814688156321307; passport_csrf_token=11a2bd60b94ebdaf28d4dbb15804edc0; passport_csrf_token_default=11a2bd60b94ebdaf28d4dbb15804edc0; odin_tt=7d3734b9e1db7b5ce2d57b11985e04d5ec7e54a2b8240ed625dc9c7c129b8adfc3b111cde9a90e1028f12d5a19fe3a0f80be83cb3036683ee791b1eee63d8bfc; n_mh=fv0PjgTuuKi867YyQhvA5l8x7FoPLYaLnvMSUafbRDc; sid_guard=512f87a7c34b3b9eab7b788e240af088%7C1745953893%7C5184000%7CSat%2C+28-Jun-2025+19%3A11%3A33+GMT; uid_tt=db870fc3f9dbaba7ab2f828cb6a243ae; uid_tt_ss=db870fc3f9dbaba7ab2f828cb6a243ae; sid_tt=512f87a7c34b3b9eab7b788e240af088; sessionid=512f87a7c34b3b9eab7b788e240af088; sessionid_ss=512f87a7c34b3b9eab7b788e240af088; is_staff_user=false; sid_ucp_v1=1.0.0-KDg2OTgxMGVhMGQ4M2YxMWYwMTk2YjUyZTdmZjk5OGRjMDU4ZTdmZTYKHwiEqfDNzc3CBxDlyMTABhjHEyAMMMu2tq4GOAdA9AcaAmhsIiA1MTJmODdhN2MzNGIzYjllYWI3Yjc4OGUyNDBhZjA4OA; ssid_ucp_v1=1.0.0-KDg2OTgxMGVhMGQ4M2YxMWYwMTk2YjUyZTdmZjk5OGRjMDU4ZTdmZTYKHwiEqfDNzc3CBxDlyMTABhjHEyAMMMu2tq4GOAdA9AcaAmhsIiA1MTJmODdhN2MzNGIzYjllYWI3Yjc4OGUyNDBhZjA4OA; novel_web_id=7498814688156321307; Hm_lpvt_2667d29c8e792e6fa9182c20a3013175=1745954336; ttwid=1%7CuGjWpxnOkFjmLID61hNpbD2hfk9PhUUOE1M7egWCU7A%7C1745954336%7Cb04eef39244c34d54601c298facde8025df0cf65b6a6bf14b71928c81fe078fa',
-        # User Agent: Chrome Information
+        'cookie':'x-web-secsdk-uid=9c8a9626-d979-4644-a5e5-fdd03907d508; Hm_lvt_2667d29c8e792e6fa9182c20a3013175=1745953872; HMACCOUNT=B8E51C9762411323; csrf_session_id=902a6c705e879baabff55b645f91cc79; s_v_web_id=verify_ma2vuudk_qIaJLENX_utDK_4XCy_ApoR_HMC71whXqbpB; gfkadpd=2503,36144; serial_uuid=7498814688156321307; serial_webid=7498814688156321307; passport_csrf_token=11a2bd60b94ebdaf28d4dbb15804edc0; passport_csrf_token_default=11a2bd60b94ebdaf28d4dbb15804edc0; odin_tt=7d3734b9e1db7b5ce2d57b11985e04d5ec7e54a2b8240ed625dc9c7c129b8adfc3b111cde9a90e1028f12d5a19fe3a0f80be83cb3036683ee791b1eee63d8bfc; n_mh=fv0PjgTuuKi867YyQhvA5l8x7FoPLYaLnvMSUafbRDc; sid_guard=512f87a7c34b3b9eab7b788e240af088%7C1745953893%7C5184000%7CSat%2C+28-Jun-2025+19%3A11%3A33+GMT; uid_tt=db870fc3f9dbaba7ab2f828cb6a243ae; uid_tt_ss=db870fc3f9dbaba7ab2f828cb6a243ae; sid_tt=512f87a7c34b3b9eab7b788e240af088; sessionid=512f87a7c34b3b9eab7b788e240af088; sessionid_ss=512f87a7c34b3b9eab7b788e240af088; is_staff_user=false; sid_ucp_v1=1.0.0-KDg2OTgxMGVhMGQ4M2YxMWYwMTk2YjUyZTdmZjk5OGRjMDU4ZTdmZTYKHwiEqfDNzc3CBxDlyMTABhjHEyAMMMu2tq4GOAdA9AcaAmhsIiA1MTJmODdhN2MzNGIzYjllYWI3Yjc4OGUyNDBhZjA4OA; ssid_ucp_v1=1.0.0-KDg2OTgxMGVhMGQ4M2YxMWYwMTk2YjUyZTdmZjk5OGRjMDU4ZTdmZTYKHwiEqfDNzc3CBxDlyMTABhjHEyAMMMu2tq4GOAdA9AcaAmhsIiA1MTJmODdhN2MzNGIzYjllYWI3Yjc4OGUyNDBhZjA4OA; novel_web_id=7498814688156321307; Hm_lpvt_2667d29c8e792e6fa9182c20a3013175=1746039621; ttwid=1%7CuGjWpxnOkFjmLID61hNpbD2hfk9PhUUOE1M7egWCU7A%7C1746039622%7C4eda76f6ff65300d62bb85c8edd7336e8f85b74dfc55aa8e425b669e2d6a47e3',        # User Agent: Chrome Information
         'user-agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36'
     }
 
-    # Novel Content URL
-    link = 'https://fanqienovel.com/page/7070069331475827748?enter_from=search'
+    # 你是这样的学姐 Content URL
+    link = 'https://fanqienovel.com/page/7254393795939142695?enter_from=search'
 
-    # Novel URL
-    url = 'https://fanqienovel.com/reader/7070069849975849506?enter_from=page'
+    # 你是这样的学姐 URL
+    # url = 'https://fanqienovel.com/reader/7070069849975849506?enter_from=page'
 
     # mapping = identify_word('dc027189e0ba4cd-700.woff2')
     # print("Font Mapping: ", mapping)
@@ -188,8 +197,8 @@ if __name__ == "__main__":
               58707: '期', 58708: '中', 58709: 'c', 58710: '外', 58711: '样', 58712: 'a', 58713: '海', 58714: '们',
               58715: '任'}
 
-    single_novel(headers, url, word_mapping)
-    #
-    # patch_novel(headers, link, word_mapping)
+    # single_novel(headers, url, word_mapping)
+
+    patch_novel(headers, link, word_mapping)
 
     exit()
